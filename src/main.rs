@@ -3,13 +3,42 @@ use chrono::{
     NaiveDateTime
 };
 use rand::Rng;
+use clap::Parser;
+
+
+#[derive(Default, Parser, Debug)]
+#[clap(author="Anand Dubey <dubey.anandkr@gmail.com>", version, about)]
+///Generate random Timestamp
+struct Arguments {
+    #[clap(short = 's', long = "sdate", validator = validate_cli_date_arg)]
+    start_date: String,
+
+    #[clap(short = 'e', long = "edate", validator = validate_cli_date_arg)]
+    end_date: String
+}
+
+fn validate_cli_date_arg(start_date: &str) -> Result<(), String>{
+    if start_date.len() != 10 {
+        Err(String::from(
+            "Date format should be YYYY-MM-DD"
+        ))
+    } else {
+        Ok(())
+    }
+}
+
 
 fn main() {
-    println!("[+] Generating random Date.... ");
-    let (start_date, end_date) = (NaiveDate::from_ymd(1999, 01, 01), NaiveDate::from_ymd(2019, 01, 01));
+    let args = Arguments::parse();
+    println!("{:?}", args);
+    let (start_date, end_date) = (
+        NaiveDate::parse_from_str(args.start_date.as_str() , "%Y-%m-%d").unwrap(),
+        NaiveDate::parse_from_str(args.end_date.as_str() , "%Y-%m-%d").unwrap()
+    );
     let random_date = random_date(start_date, end_date);
     println!("[+] Random date between {start_date} and {end_date}  is  {random_date}")
 }
+
 
 fn random_date(start_date: NaiveDate, end_date: NaiveDate) -> NaiveDate {
     validate_date_args(start_date, end_date);
